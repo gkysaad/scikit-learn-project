@@ -8,22 +8,30 @@ class myKNN:
         self.train = x_train
         self.target = y_train
 
-    def predict(self, x_test):
+    def predict(self, k, x_test):
         predictions = []
         for row in x_test:
-            label = self.closest(row)
-            predictions.append(label)
+            neighbours = self.closest(row)
+            counter = {}
+            if len(neighbours) < k:
+                k = len(neighbours)
+            for i in range(k):
+                if str(neighbours[i][1]) in counter:
+                    counter[str(neighbours[i][1])] += 1
+                else:
+                    counter[str(neighbours[i][1])] = 1
+            #print(counter)
+            counter = sorted(counter, key=counter.get)
+            predictions.append(int(counter[0]))
+        #print(predictions)                   
         return predictions
     
     def closest(self, row):
-        best = euc(row, self.train[0])
-        choice = self.target[0]
+        arr = []
         for i in range(len(self.train)):
             new_dist = euc(row, self.train[i])
-            if new_dist < best:
-                best = new_dist
-                choice = self.target[i]
-        return choice
+            arr.append((new_dist, self.target[i]))
+        return sorted(arr)
 
 
 
@@ -44,5 +52,5 @@ my_classifier = myKNN()
 
 my_classifier.fit(x_train, y_train)
 
-pred = my_classifier.predict(x_test)
+pred = my_classifier.predict(3, x_test)
 print(accuracy_score(y_test, pred))
